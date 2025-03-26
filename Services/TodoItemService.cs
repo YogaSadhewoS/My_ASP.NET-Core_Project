@@ -53,5 +53,18 @@ namespace AspNetCoreTodo.Services
             var saveResult = await _context.SaveChangesAsync();
             return saveResult == 1;
         }
+
+        public async Task<bool> DeleteItemAsync(Guid id, IdentityUser user)
+        {
+            // Cari item berdasarkan id dan user
+            var item = await _context.TodoItems.FirstOrDefaultAsync(x => x.Id == id && x.UserId == user.Id);
+            if (item == null)
+            {
+                return false;
+            }
+
+            _context.TodoItems.Remove(item);
+            return await _context.SaveChangesAsync() > 0;
+        }
     }
 }

@@ -43,7 +43,7 @@ namespace AspNetCoreTodo.Controllers
 
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
-            
+
             if (!ModelState.IsValid)
             {
                 var items = await _todoItemService.GetIncompleteItemAsync(currentUser);
@@ -83,5 +83,30 @@ namespace AspNetCoreTodo.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteItem(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+
+            var successful = await _todoItemService.DeleteItemAsync(id, currentUser);
+            if (!successful)
+            {
+                return BadRequest(new { error = "Could not delete item." });
+            }
+
+            return RedirectToAction("Index");
+        }
+
     }
 }

@@ -12,4 +12,5 @@ public class ApplicationDbContext : IdentityDbContext
     }
 
     public DbSet<TodoItem> Items { get; set; } //Store TodoItem entities ke tabel Items
+    public DbSet<TodoItem> TodoItems { get; set; }
 }
