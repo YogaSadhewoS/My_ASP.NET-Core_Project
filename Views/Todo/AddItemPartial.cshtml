@@ -1,7 +1,10 @@
 @model TodoItem
 
 <form asp-action="AddItem" method="POST">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
     <label asp-for="Title">Add a new item:</label>
     <input asp-for="Title">
+    @* <span asp-validation-for="Title" class="text-danger"></span> *@
     <button type="submit">Add</button>
 </form>

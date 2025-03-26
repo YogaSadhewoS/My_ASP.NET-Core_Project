@@ -40,13 +40,16 @@ namespace AspNetCoreTodo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddItem(TodoItem newItem)
         {
-            if (!ModelState.IsValid)
-            {
-                return RedirectToAction("Index");
-            }
 
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) return Challenge();
+            
+            if (!ModelState.IsValid)
+            {
+                var items = await _todoItemService.GetIncompleteItemAsync(currentUser);
+                var model = new TodoViewModel { Items = items };
+                return View("Index", model);
+            }
 
             var successful = await _todoItemService
                 .AddItemAsync(newItem, currentUser);
