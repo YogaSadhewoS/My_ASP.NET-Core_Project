@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AspNetCoreTodo;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using AspNetCoreTodo.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<TodoItemValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<TodoItemDtoValidator>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddScoped<ITodoItemRepository, TodoItemRepository>();
+builder.Services.AddScoped<ITodoItemService, TodoItemService>();
 
 var app = builder.Build();
 
