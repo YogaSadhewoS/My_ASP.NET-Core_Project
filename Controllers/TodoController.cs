@@ -7,6 +7,8 @@ using AspNetCoreTodo.Services;
 using AspNetCoreTodo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using AutoMapper;
+using AspNetCoreTodo.DTOs;
 
 namespace AspNetCoreTodo.Controllers
 {
@@ -15,11 +17,13 @@ namespace AspNetCoreTodo.Controllers
     {
         private readonly ITodoItemService _todoItemService;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IMapper _mapper;
 
-        public TodoController(ITodoItemService todoItemService, UserManager<IdentityUser> userManager)
+        public TodoController(ITodoItemService todoItemService, UserManager<IdentityUser> userManager, IMapper mapper)
         {
             _todoItemService = todoItemService;
             _userManager = userManager;
+            _mapper = mapper;
         }
 
         public async Task<IActionResult> Index()
@@ -28,17 +32,20 @@ namespace AspNetCoreTodo.Controllers
             if (currentUser == null) return Challenge();
 
             var items = await _todoItemService.GetIncompleteItemAsync(currentUser);
+            // Mapping dari domain model ke DTO
+            var dtoItems = _mapper.Map<IEnumerable<TodoItemDto>>(items);
 
             var model = new TodoViewModel()
             {
-                Items = items
+                Items = dtoItems
             };
 
             return View(model);
         }
 
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddItem(TodoItem newItem)
+        public async Task<IActionResult> AddItem(TodoItemDto newItemDto)
         {
 
             var currentUser = await _userManager.GetUserAsync(User);
@@ -47,9 +54,14 @@ namespace AspNetCoreTodo.Controllers
             if (!ModelState.IsValid)
             {
                 var items = await _todoItemService.GetIncompleteItemAsync(currentUser);
-                var model = new TodoViewModel { Items = items };
+                var dtoItems = _mapper.Map<IEnumerable<TodoItemDto>>(items);
+                var model = new TodoViewModel { Items = dtoItems };
                 return View("Index", model);
             }
+
+            // Mapping dari DTO ke domain model
+            var newItem = _mapper.Map<TodoItem>(newItemDto);
+            newItem.UserId = currentUser.Id;
 
             var successful = await _todoItemService
                 .AddItemAsync(newItem, currentUser);
@@ -62,6 +74,7 @@ namespace AspNetCoreTodo.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkDone(Guid id) //karena hidden element di index.cshtml ditulis id
         {

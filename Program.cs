@@ -23,6 +23,8 @@ builder.Services.AddScoped<ITodoItemService, TodoItemService>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<TodoItemValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<TodoItemDtoValidator>();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
